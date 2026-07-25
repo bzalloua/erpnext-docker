@@ -44,6 +44,8 @@ COPY --chown=frappe --chmod=0755 ./script/railway-setup.sh /home/frappe/frappe-b
 COPY --chown=frappe --chmod=0755 ./script/railway-entrypoint.sh /usr/local/bin/railway-entrypoint.sh
 COPY --chown=frappe --chmod=0755 ./script/railway-cmd.sh /usr/local/bin/railway-cmd.sh
 
+RUN su frappe -c "cd /home/frappe/frappe-bench && bench get-app --branch=version-16 https://github.com/Arus-Info/ERPNext-Australian-Localisation.git"
+
 USER root
 
 ENTRYPOINT ["/usr/local/bin/railway-entrypoint.sh"]
