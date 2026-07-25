@@ -66,7 +66,7 @@ RUN bench init \
     /home/frappe/frappe-bench && \
     cd /home/frappe/frappe-bench && \
     bench get-app --branch=${ERPNEXT_BRANCH} --resolve-deps erpnext ${ERPNEXT_REPO} && \
-    bench get-app --branch=version-16 https://github.com/Arus-Info/ERPNext-Australian-Localisation.git && \
+    bench get-app --branch=${ERPNEXT_BRANCH} https://github.com/Arus-Info/ERPNext-Australian-Localisation.git && \
     echo "{}" > sites/common_site_config.json
 
 ###############################################
