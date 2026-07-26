@@ -4,36 +4,17 @@ USER root
 
 RUN apt-get update \
     && apt-get install -y -q \
-    # [fix] "debconf: delaying package configuration, since apt-utils is not installed"
     apt-utils \
-    # [fix] "debconf: unable to initialize frontend: Dialog"
-    # https://github.com/moby/moby/issues/27988
     && echo "debconf debconf/frontend select Noninteractive" | debconf-set-selections \
-    ###############################################
-    # add sudo
-    ###############################################
     && apt-get install -y -q sudo \
     && echo "frappe ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers \
-    ###############################################
-    # add supervisor
-    ###############################################
     && apt-get install -y -q \
     supervisor \
     nginx \
-    ###############################################
-    # clean-up
-    ###############################################
     && apt-get autoremove --purge -y \
     && apt-get clean -y \
     && rm -rf /var/lib/apt/lists/* \
     && rm -rf /tmp/*
-
-# copy built_sites from sites
-RUN mkdir -p /home/frappe/frappe-bench/built_sites \
-    && cp -r /home/frappe/frappe-bench/sites/assets /home/frappe/frappe-bench/built_sites/assets \
-    && cp /home/frappe/frappe-bench/sites/apps.json /home/frappe/frappe-bench/built_sites/apps.json \
-    && cp /home/frappe/frappe-bench/sites/apps.txt /home/frappe/frappe-bench/built_sites/apps.txt \
-    && chown -R frappe:frappe /home/frappe/frappe-bench/built_sites
 
 # copy template
 COPY ./template/temp_nginx.conf /home/frappe/temp_nginx.conf
@@ -44,7 +25,19 @@ COPY --chown=frappe --chmod=0755 ./script/railway-setup.sh /home/frappe/frappe-b
 COPY --chown=frappe --chmod=0755 ./script/railway-entrypoint.sh /usr/local/bin/railway-entrypoint.sh
 COPY --chown=frappe --chmod=0755 ./script/railway-cmd.sh /usr/local/bin/railway-cmd.sh
 
+# install Australian localisation app
 RUN su frappe -c "cd /home/frappe/frappe-bench && bench get-app --branch=version-16 https://github.com/Arus-Info/ERPNext-Australian-Localisation.git"
+
+# ensure apps.txt contains the localisation app
+RUN grep -qxF "erpnext_australian_localisation" /home/frappe/frappe-bench/sites/apps.txt || \
+    echo "erpnext_australian_localisation" >> /home/frappe/frappe-bench/sites/apps.txt
+
+# rebuild built_sites from updated sites directory
+RUN mkdir -p /home/frappe/frappe-bench/built_sites \
+    && cp -r /home/frappe/frappe-bench/sites/assets /home/frappe/frappe-bench/built_sites/assets \
+    && cp /home/frappe/frappe-bench/sites/apps.json /home/frappe/frappe-bench/built_sites/apps.json \
+    && cp /home/frappe/frappe-bench/sites/apps.txt /home/frappe/frappe-bench/built_sites/apps.txt \
+    && chown -R frappe:frappe /home/frappe/frappe-bench/built_sites
 
 USER root
 
