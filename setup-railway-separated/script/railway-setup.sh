@@ -39,6 +39,11 @@ su frappe -c "bench new-site ${RFP_DOMAIN_NAME} \
 echo "-> Install Australian localisation"
 su frappe -c "bench --site ${RFP_DOMAIN_NAME} install-app erpnext_australian_localisation"
 
+echo "-> Run migrations"
+su frappe -c "bench --site ${RFP_DOMAIN_NAME} migrate"
+
+su frappe -c "cd /home/frappe/frappe-bench && bench --site ${RFP_DOMAIN_NAME} migrate"
+
 su frappe -c "bench use ${RFP_DOMAIN_NAME}"
 
 echo "-> Enable scheduler"
